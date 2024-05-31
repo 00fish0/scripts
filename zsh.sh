@@ -1,6 +1,8 @@
 #!/bin/bash
 
 # tested on ubuntu 22.04
+# 执行到oh-my-zsh的时候好像会询问是否更换shell，需要手动输入y，输入之后这个进程似乎被放到后台了
+# 不知道如何解决，但是可以重新运行一次脚本。
 
 print_stage() {
   echo -e "\033[31m[STAGE $1] $2\033[0m"
