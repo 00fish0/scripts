@@ -7,7 +7,7 @@ network_account="2023311B21 tzh20050911"
 startup_sec="10s"
 
 CACHE_ROOT=/tmp/deploy_cache
-STAGE=0
+STAGE=-1
 TOT_STAGE=5
 
 function update_stage() {
@@ -27,6 +27,14 @@ function log() {
   echo -e "\033[32m[LOG] $1\033[0m"
 }
 # cat ~/.ssh/id_rsa.pub | ssh $server "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
+function stage_0() {
+  print_stage 0 "ssh passwordless login"
+
+  cat << 'EOF' >> ~/.ssh/authorized_keys
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC25xRSeFNmFYr+EstSVErlPIQtT6SWn+YzUz/py70uVUVHKqXhBjuAttCqJ1SQXBHs84BamzRQQOL/Rc38slv0cO030++9Yw4QLbhRPxbAkJPIkrRisL9YX0gG+dvISXRPJy1u/FXZyJQv6TEf2ELiF7Xa8vcnSAhV4oGd/C/ePrpZYzFpX1+Vj0zl627OdFhBRv5TfpWcXRXmfvZ2OtOR/duxXNqavGrNKYt09qLIMAfkLPbVVWss7FIHOR+kcv/bzi49wGbbWhHw4xI3TsPwFG5reiYQVdODaACKi0TopW5BupGf6WJyX95eLZfCyzRD4COQ20p1jRVip4uSv47r77Br9IzrGmUSj5KI9xo9XhYGoVuvrjlpk1Wvp3qOTBzYgvZw/O/+aPgpuL6AQyIjEKdFGQ1jmPF3s9ki+J8Ux0Oppdtgd9ov14/gv9tFOR7VTtOuJIwAyGcm0yyS8C46oZwgXMatqsMNM84/T56Ka/H+mB5oqo5oXANZtyxjR0s= TZH@LAPTOP-S5UUUS6Q
+EOF
+}
 
 function stage_1() {
   print_stage 1 "Setup School Network Login Script"
