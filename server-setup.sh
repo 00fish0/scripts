@@ -8,6 +8,7 @@ startup_sec="10s"
 
 CACHE_ROOT=/tmp/deploy_cache
 STAGE=0
+TOT_STAGE=5
 
 function update_stage() {
 	STAGE=$(($STAGE + 1))
@@ -37,21 +38,21 @@ function stage_1() {
   cat << 'EOF' > login.sh # here-document
   echo "[LOG] $(date '+%Y-%m-%d %H:%M:%S')" >> ~/auto_login/login.log
   ~/auto_login/SRUN_LOGIN $network_account >> ~/auto_login/login.log 2>&1
-  EOF
+EOF
 }
 
 function stage_2() {
   print_stage 2 "Create system service & timer"
 
-  cat << EOF | sudo tee /etc/systemd/system/srun_login.service > /dev/null
+  cat << 'EOF' > /etc/systemd/system/srun_login.service
   [Unit]
   Description=login school-net
 
   [Service]
   ExecStart=sudo /bin/bash ~/auto_login/login.sh
-  EOF
+EOF
 
-  cat << EOF | sudo tee /etc/systemd/system/srun_login.timer > /dev/null # if login fails with network setup error, increase OnStartupSec below.
+  cat << 'EOF' > /etc/systemd/system/srun_login.timer  # if login fails with network setup error, increase OnStartupSec below.
   [Unit]
   Description=Runs login school-net script timer
 
@@ -61,7 +62,7 @@ function stage_2() {
 
   [Install]
   WantedBy=multi-user.target
-  EOF
+EOF
 
   sudo systemctl enable srun_login.timer
 }
@@ -72,43 +73,43 @@ function stage_3() {
   if grep -q 'ubuntu' /etc/os-release; then
     log "Ubuntu detected."
     cat <<'EOF' > /etc/apt/sources.list
-  # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
-  deb https://mirrors.osa.moe/ubuntu/ jammy main restricted universe multiverse
-  # deb-src https://mirrors.osa.moe/ubuntu/ jammy main restricted universe multiverse
-  deb https://mirrors.osa.moe/ubuntu/ jammy-updates main restricted universe multiverse
-  # deb-src https://mirrors.osa.moe/ubuntu/ jammy-updates main restricted universe multiverse
-  deb https://mirrors.osa.moe/ubuntu/ jammy-backports main restricted universe multiverse
-  # deb-src https://mirrors.osa.moe/ubuntu/ jammy-backports main restricted universe multiverse
+    # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+    deb https://mirrors.osa.moe/ubuntu/ jammy main restricted universe multiverse
+    # deb-src https://mirrors.osa.moe/ubuntu/ jammy main restricted universe multiverse
+    deb https://mirrors.osa.moe/ubuntu/ jammy-updates main restricted universe multiverse
+    # deb-src https://mirrors.osa.moe/ubuntu/ jammy-updates main restricted universe multiverse
+    deb https://mirrors.osa.moe/ubuntu/ jammy-backports main restricted universe multiverse
+    # deb-src https://mirrors.osa.moe/ubuntu/ jammy-backports main restricted universe multiverse
 
-  # deb https://mirrors.osa.moe/ubuntu/ jammy-security main restricted universe multiverse
-  # # deb-src https://mirrors.osa.moe/ubuntu/ jammy-security main restricted universe multiverse
+    # deb https://mirrors.osa.moe/ubuntu/ jammy-security main restricted universe multiverse
+    # # deb-src https://mirrors.osa.moe/ubuntu/ jammy-security main restricted universe multiverse
 
-  deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
-  # deb-src http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+    deb http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
+    # deb-src http://security.ubuntu.com/ubuntu/ jammy-security main restricted universe multiverse
 
-  # 预发布软件源，不建议启用
-  # deb https://mirrors.osa.moe/ubuntu/ jammy-proposed main restricted universe multiverse
-  # # deb-src https://mirrors.osa.moe/ubuntu/ jammy-proposed main restricted universe multiverse
-  EOF
+    # 预发布软件源，不建议启用
+    # deb https://mirrors.osa.moe/ubuntu/ jammy-proposed main restricted universe multiverse
+    # # deb-src https://mirrors.osa.moe/ubuntu/ jammy-proposed main restricted universe multiverse
+EOF
   elif grep -q 'debian' /etc/os-release; then
     log "Debian detected."
-  cat <<'EOF' > /etc/apt/sources.list
-  # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
-  deb https://mirrors.osa.moe/debian/ bookworm main contrib non-free non-free-firmware
-  # deb-src https://mirrors.osa.moe/debian/ bookworm main contrib non-free non-free-firmware
+    cat <<'EOF' > /etc/apt/sources.list
+    # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+    deb https://mirrors.osa.moe/debian/ bookworm main contrib non-free non-free-firmware
+    # deb-src https://mirrors.osa.moe/debian/ bookworm main contrib non-free non-free-firmware
 
-  deb https://mirrors.osa.moe/debian/ bookworm-updates main contrib non-free non-free-firmware
-  # deb-src https://mirrors.osa.moe/debian/ bookworm-updates main contrib non-free non-free-firmware
+    deb https://mirrors.osa.moe/debian/ bookworm-updates main contrib non-free non-free-firmware
+    # deb-src https://mirrors.osa.moe/debian/ bookworm-updates main contrib non-free non-free-firmware
 
-  deb https://mirrors.osa.moe/debian/ bookworm-backports main contrib non-free non-free-firmware
-  # deb-src https://mirrors.osa.moe/debian/ bookworm-backports main contrib non-free non-free-firmware
+    deb https://mirrors.osa.moe/debian/ bookworm-backports main contrib non-free non-free-firmware
+    # deb-src https://mirrors.osa.moe/debian/ bookworm-backports main contrib non-free non-free-firmware
 
-  # deb https://mirrors.osa.moe/debian-security bookworm-security main contrib non-free non-free-firmware
-  # # deb-src https://mirrors.osa.moe/debian-security bookworm-security main contrib non-free non-free-firmware
+    # deb https://mirrors.osa.moe/debian-security bookworm-security main contrib non-free non-free-firmware
+    # # deb-src https://mirrors.osa.moe/debian-security bookworm-security main contrib non-free non-free-firmware
 
-  deb https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
-  # deb-src https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
-  EOF
+    deb https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+    # deb-src https://security.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+EOF
   else
     error "Unsupported OS."
   fi
@@ -119,7 +120,7 @@ function stage_4() {
 
   sudo apt update
   sudo apt install git tmux vim -y
-  sudo apt upgrade
+  sudo apt upgrade -y
 }
 
 function stage_5() {
@@ -130,14 +131,48 @@ function stage_5() {
   ./dotfiles/setup.sh
 }
 
-mkdir -p $CACHE_ROOT
-if [ -f "$CACHE_ROOT/stage" ]; then
-	STAGE=$(cat $CACHE_ROOT/stage)
-	log "Continue from stage $STAGE"
-	STAGE=$(($STAGE - 1))
-fi
+function branch_continue() {
+  mkdir -p $CACHE_ROOT
+  if [ -f "$CACHE_ROOT/stage" ]; then
+    STAGE=$(cat $CACHE_ROOT/stage)
+    log "Continue from stage $STAGE"
+    STAGE=$(($STAGE - 1))
+  fi
 
-## Main
-for ((i = $(($STAGE + 1)); i <= $TOT_STAGE; i++)); do
-	stage_$i
-done
+  ## continue from the next stage
+  for ((i = $(($STAGE + 1)); i <= $TOT_STAGE; i++)); do
+    stage_$i
+  done
+}
+
+function main() {
+  if [ $# -gt 1 ]; then
+    error "0/1 argument expected.\nUsage: $0 [clear|all] ..."
+    return 1
+  fi
+
+  if [ $# -eq 1 ]; then
+    case "$1" in
+      clear)
+        # 添加清理逻辑
+        log "Clearing..."
+        rm -r $CACHE_ROOT
+        ;;
+      all)
+        # 添加执行所有阶段的逻辑
+        log "Forcing to execute all stages..."
+        rm -r $CACHE_ROOT
+        branch_continue
+        ;;
+      *)
+        # 如果传入未知参数，显示错误消息
+        error "Unknown argument '$1'.\nUsage: $0 [clear|all]"
+        return 1
+        ;;
+    esac
+  else
+    branch_continue
+  fi
+}
+
+main "$@"
